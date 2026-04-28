@@ -1,17 +1,1336 @@
 ---
-
 ---
 
-<html lang="en">
+<!doctype html>
+<html lang="zh-CN">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<title>个人 AI 编程经验分享</title>
+		<style>
+			:root {
+				--near-black: #141413;
+				--dark-surface: #30302e;
+				--parchment: #f5f4ed;
+				--ivory: #faf9f5;
+				--warm-sand: #e8e6dc;
+				--border-cream: #f0eee6;
+				--border-warm: #e8e6dc;
+				--terracotta: #c96442;
+				--coral: #d97757;
+				--charcoal: #4d4c48;
+				--olive: #5e5d59;
+				--stone: #87867f;
+				--silver: #b0aea5;
+				--serif: Georgia, "Times New Roman", serif;
+				--sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+				--mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			html,
+			body {
+				margin: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+				background: var(--near-black);
+				color: var(--near-black);
+				font-family: var(--sans);
+			}
+
+			a {
+				color: inherit;
+				text-decoration: none;
+			}
+
+			.deck-shell {
+				width: 100vw;
+				height: 100vh;
+				height: 100dvh;
+				background:
+					linear-gradient(rgba(245, 244, 237, 0.03) 1px, transparent 1px),
+					linear-gradient(90deg, rgba(245, 244, 237, 0.03) 1px, transparent 1px),
+					var(--near-black);
+				background-size: 72px 72px;
+				position: relative;
+			}
+
+			.stage {
+				width: 1920px;
+				height: 1080px;
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				transform-origin: center center;
+				box-shadow: rgba(0, 0, 0, 0.38) 0 40px 120px;
+				overflow: hidden;
+			}
+
+			.slide {
+				position: absolute;
+				inset: 0;
+				display: none;
+				padding: 84px 96px;
+				background: var(--parchment);
+				overflow: hidden;
+			}
+
+			.slide.active {
+				display: flex;
+				animation: slideInForward 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+			}
+
+			.stage.transition-backward .slide.active {
+				animation-name: slideInBackward;
+			}
+
+			.slide.dark {
+				background: var(--near-black);
+				color: var(--ivory);
+			}
+
+			.slide.dark .kicker,
+			.slide.dark .body,
+			.slide.dark .muted,
+			.slide.dark .slide-no,
+			.slide.dark .source-link {
+				color: var(--silver);
+			}
+
+			.slide.dark .source-link {
+				background: var(--dark-surface);
+				color: var(--ivory);
+				box-shadow: 0 0 0 1px #3d3d3a;
+			}
+
+			.slide.dark .panel,
+			.slide.dark .mini-card,
+			.slide.dark .quote-card {
+				background: var(--dark-surface);
+				border-color: #3d3d3a;
+				color: var(--ivory);
+			}
+
+			.slide.dark .body strong,
+			.slide.dark .mini-card strong {
+				color: var(--ivory);
+			}
+
+			.slide.dark .compare-card:not(.dark-card) h2 {
+				color: var(--near-black);
+			}
+
+			.slide.dark .compare-card:not(.dark-card) .body {
+				color: var(--olive);
+			}
+
+			.slide-grid {
+				width: 100%;
+				height: 100%;
+				display: grid;
+				gap: 56px;
+				position: relative;
+				z-index: 2;
+			}
+
+			.two-col {
+				grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+				align-items: center;
+			}
+
+			.equal-col {
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				align-items: stretch;
+			}
+
+			.three-col {
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+			}
+
+			.center {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+			}
+
+			.stack {
+				display: flex;
+				flex-direction: column;
+				gap: 28px;
+			}
+
+			.spread {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 36px;
+			}
+
+			.slide-top-stack {
+				display: flex;
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 18px;
+			}
+
+			.kicker {
+				margin: 0 0 20px;
+				color: var(--terracotta);
+				font-size: 23px;
+				font-weight: 500;
+				letter-spacing: 0.12px;
+			}
+
+			h1,
+			h2,
+			h3 {
+				margin: 0;
+				font-family: var(--serif);
+				font-weight: 500;
+				letter-spacing: 0;
+				text-wrap: pretty;
+			}
+
+			h1 {
+				max-width: 1240px;
+				font-size: 116px;
+				line-height: 1.05;
+			}
+
+			h2 {
+				font-size: 78px;
+				line-height: 1.08;
+			}
+
+			h3 {
+				font-size: 44px;
+				line-height: 1.14;
+			}
+
+			.body {
+				margin: 0;
+				color: var(--olive);
+				font-size: 31px;
+				line-height: 1.48;
+				text-wrap: pretty;
+			}
+
+			.body.large {
+				font-family: var(--serif);
+				font-size: 50px;
+				line-height: 1.24;
+				color: var(--charcoal);
+			}
+
+			.body strong {
+				color: var(--near-black);
+				font-weight: 600;
+			}
+
+			.muted {
+				color: var(--stone);
+			}
+
+			.accent {
+				color: var(--terracotta);
+			}
+
+			.slide-no {
+				position: absolute;
+				left: 96px;
+				bottom: 62px;
+				color: var(--stone);
+				font-size: 20px;
+				font-family: var(--mono);
+				letter-spacing: 0.2px;
+			}
+
+			.chapter-mark {
+				position: absolute;
+				right: 86px;
+				top: 64px;
+				width: 128px;
+				height: 128px;
+				border-radius: 50%;
+				border: 1px solid var(--border-warm);
+				color: var(--terracotta);
+				display: grid;
+				place-items: center;
+				font-family: var(--serif);
+				font-size: 48px;
+				background: rgba(250, 249, 245, 0.62);
+			}
+
+			.panel,
+			.mini-card,
+			.quote-card,
+			.image-frame {
+				background: var(--ivory);
+				border: 1px solid var(--border-cream);
+				border-radius: 18px;
+				box-shadow: rgba(20, 20, 19, 0.05) 0 4px 24px;
+			}
+
+			.slide.active .kicker,
+			.slide.active h1,
+			.slide.active h2,
+			.slide.active h3,
+			.slide.active .body,
+			.slide.active .quote-card,
+			.slide.active .mini-card,
+			.slide.active .list li,
+			.slide.active .table,
+			.slide.active .compare-card,
+			.slide.active .flow-step,
+			.slide.active .image-frame,
+			.slide.active .source-row,
+			.slide.active .code-sample {
+				animation: liftIn 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
+			}
+
+			.slide.active .kicker {
+				animation-delay: 70ms;
+			}
+
+			.slide.active h1,
+			.slide.active h2 {
+				animation-delay: 130ms;
+			}
+
+			.slide.active .body,
+			.slide.active .quote-card,
+			.slide.active .table,
+			.slide.active .compare-card:nth-child(1) {
+				animation-delay: 210ms;
+			}
+
+			.slide.active .source-row,
+			.slide.active .image-frame,
+			.slide.active .code-sample,
+			.slide.active .compare-card:nth-child(2) {
+				animation-delay: 300ms;
+			}
+
+			.slide.active .mini-card:nth-child(1),
+			.slide.active .list li:nth-child(1),
+			.slide.active .flow-step:nth-child(1) {
+				animation-delay: 240ms;
+			}
+
+			.slide.active .mini-card:nth-child(2),
+			.slide.active .list li:nth-child(2),
+			.slide.active .flow-step:nth-child(2) {
+				animation-delay: 320ms;
+			}
+
+			.slide.active .mini-card:nth-child(3),
+			.slide.active .list li:nth-child(3),
+			.slide.active .flow-step:nth-child(3) {
+				animation-delay: 400ms;
+			}
+
+			.slide.active .flow-step:nth-child(4) {
+				animation-delay: 480ms;
+			}
+
+			.slide.active .flow-step:nth-child(5) {
+				animation-delay: 560ms;
+			}
+
+			.panel {
+				padding: 42px;
+			}
+
+			.quote-card {
+				padding: 58px 64px;
+			}
+
+			.quote-card p {
+				margin: 0;
+				font-family: var(--serif);
+				font-size: 72px;
+				line-height: 1.16;
+				text-wrap: pretty;
+			}
+
+			.quote-card small {
+				display: block;
+				margin-top: 30px;
+				color: var(--stone);
+				font-size: 24px;
+			}
+
+			.mini-grid {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 24px;
+			}
+
+			.mini-grid.two {
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+			}
+
+			.mini-card {
+				padding: 32px;
+				min-height: 200px;
+				display: flex;
+				flex-direction: column;
+				gap: 18px;
+			}
+
+			.mini-card strong {
+				font-family: var(--serif);
+				font-size: 36px;
+				line-height: 1.12;
+				font-weight: 500;
+				color: var(--near-black);
+			}
+
+			.mini-card span,
+			.mini-card p {
+				margin: 0;
+				color: var(--olive);
+				font-size: 24px;
+				line-height: 1.42;
+			}
+
+			.slide.dark .mini-card span,
+			.slide.dark .mini-card p {
+				color: var(--silver);
+			}
+
+			.list {
+				margin: 0;
+				padding: 0;
+				list-style: none;
+				display: flex;
+				flex-direction: column;
+				gap: 22px;
+			}
+
+			.list li {
+				padding: 24px 28px;
+				border-radius: 16px;
+				background: rgba(250, 249, 245, 0.7);
+				box-shadow: 0 0 0 1px var(--border-cream);
+				color: var(--olive);
+				font-size: 28px;
+				line-height: 1.34;
+			}
+
+			.slide.dark .list li {
+				background: rgba(48, 48, 46, 0.8);
+				box-shadow: 0 0 0 1px #3d3d3a;
+				color: var(--silver);
+			}
+
+			.compare {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 28px;
+				height: 100%;
+			}
+
+			.compare-card {
+				border-radius: 24px;
+				padding: 48px;
+				background: var(--ivory);
+				border: 1px solid var(--border-warm);
+				display: flex;
+				flex-direction: column;
+				gap: 28px;
+			}
+
+			.compare-card.dark-card {
+				background: var(--dark-surface);
+				color: var(--ivory);
+				border-color: #3d3d3a;
+			}
+
+			.compare-card .tag {
+				width: fit-content;
+				padding: 10px 16px;
+				border-radius: 999px;
+				background: var(--warm-sand);
+				color: var(--charcoal);
+				font-size: 20px;
+			}
+
+			.compare-card.dark-card .tag {
+				background: var(--near-black);
+				color: var(--silver);
+			}
+
+			.table {
+				display: grid;
+				border-radius: 20px;
+				overflow: hidden;
+				border: 1px solid var(--border-warm);
+			}
+
+			.row {
+				display: grid;
+				grid-template-columns: 0.8fr 1fr 1fr;
+				min-height: 112px;
+			}
+
+			.row + .row {
+				border-top: 1px solid var(--border-warm);
+			}
+
+			.cell {
+				padding: 28px 32px;
+				background: var(--ivory);
+				font-size: 27px;
+				line-height: 1.3;
+				color: var(--olive);
+			}
+
+			.cell + .cell {
+				border-left: 1px solid var(--border-warm);
+			}
+
+			.header .cell {
+				background: var(--warm-sand);
+				color: var(--near-black);
+				font-family: var(--serif);
+				font-size: 32px;
+			}
+
+			.flow {
+				display: grid;
+				grid-template-columns: repeat(5, minmax(0, 1fr));
+				gap: 22px;
+				align-items: stretch;
+			}
+
+			.flow-step {
+				position: relative;
+				padding: 30px 26px;
+				border-radius: 18px;
+				background: var(--ivory);
+				box-shadow: 0 0 0 1px var(--border-warm);
+				min-height: 190px;
+			}
+
+			.flow-step::after {
+				content: "";
+				position: absolute;
+				top: 50%;
+				right: -17px;
+				width: 12px;
+				height: 12px;
+				border-top: 2px solid var(--terracotta);
+				border-right: 2px solid var(--terracotta);
+				transform: translateY(-50%) rotate(45deg);
+			}
+
+			.flow-step:last-child::after {
+				display: none;
+			}
+
+			.flow.vertical .flow-step::after {
+				display: none;
+			}
+
+			.flow-step b {
+				display: block;
+				margin-bottom: 18px;
+				font-family: var(--serif);
+				font-size: 31px;
+				font-weight: 500;
+			}
+
+			.flow-step span {
+				color: var(--olive);
+				font-size: 22px;
+				line-height: 1.36;
+			}
+
+			.image-frame {
+				overflow: hidden;
+				position: relative;
+				transition:
+					transform 220ms ease,
+					box-shadow 220ms ease;
+			}
+
+			.image-frame:hover,
+			.image-frame:focus-visible {
+				transform: translateY(-4px);
+				box-shadow:
+					rgba(20, 20, 19, 0.08) 0 12px 34px,
+					0 0 0 1px var(--border-warm);
+				outline: none;
+			}
+
+			.image-frame img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				display: block;
+			}
+
+			.image-frame.contain img {
+				object-fit: contain;
+				background: var(--ivory);
+			}
+
+			.image-frame.tall img {
+				object-position: center top;
+			}
+
+			.image-caption {
+				position: absolute;
+				left: 18px;
+				bottom: 18px;
+				max-width: calc(100% - 36px);
+				padding: 10px 14px;
+				border-radius: 14px;
+				background: rgba(20, 20, 19, 0.76);
+				color: var(--ivory);
+				font-size: 18px;
+				line-height: 1.35;
+				backdrop-filter: blur(10px);
+			}
+
+			.prompt-caption {
+				font-size: 20px;
+				text-wrap: pretty;
+			}
+
+			.source-row {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 14px;
+				align-items: center;
+			}
+
+			.source-link {
+				display: inline-flex;
+				align-items: center;
+				min-height: 46px;
+				padding: 10px 16px;
+				border-radius: 14px;
+				background: rgba(250, 249, 245, 0.72);
+				color: var(--olive);
+				font-size: 19px;
+				line-height: 1.25;
+				box-shadow: 0 0 0 1px var(--border-warm);
+			}
+
+			.source-link:hover,
+			.source-link:focus-visible {
+				color: var(--near-black);
+				background: var(--warm-sand);
+				outline: none;
+			}
+
+			.slide.dark .source-link:hover,
+			.slide.dark .source-link:focus-visible {
+				color: var(--ivory);
+				background: #3d3d3a;
+			}
+
+			.screenshot-grid {
+				display: grid;
+				gap: 28px;
+			}
+
+			.screenshot-grid.three {
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+			}
+
+			.big-number {
+				font-family: var(--serif);
+				font-size: 170px;
+				line-height: 0.9;
+				color: var(--terracotta);
+			}
+
+			.code-sample {
+				margin: 0;
+				padding: 34px 38px;
+				border-radius: 18px;
+				background: var(--near-black);
+				color: var(--silver);
+				font-family: var(--mono);
+				font-size: 24px;
+				line-height: 1.5;
+				white-space: pre-wrap;
+				box-shadow: 0 0 0 1px var(--dark-surface);
+			}
+
+			.deck-controls {
+				position: fixed;
+				left: 50%;
+				bottom: 22px;
+				transform: translateX(-50%);
+				z-index: 20;
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				padding: 10px;
+				border-radius: 999px;
+				background: rgba(20, 20, 19, 0.76);
+				backdrop-filter: blur(16px);
+				box-shadow: 0 0 0 1px rgba(245, 244, 237, 0.16);
+			}
+
+			.deck-controls button {
+				min-width: 44px;
+				height: 44px;
+				border: 0;
+				border-radius: 999px;
+				background: var(--warm-sand);
+				color: var(--charcoal);
+				font-size: 20px;
+				cursor: pointer;
+				box-shadow: 0 0 0 1px var(--border-warm);
+			}
+
+			.deck-controls button:hover,
+			.deck-controls button:focus-visible {
+				background: var(--ivory);
+				outline: none;
+			}
+
+			.deck-controls button:disabled {
+				opacity: 0.45;
+				cursor: not-allowed;
+			}
+
+			.counter {
+				min-width: 86px;
+				text-align: center;
+				color: var(--ivory);
+				font-family: var(--mono);
+				font-size: 15px;
+			}
+
+			.progress {
+				position: fixed;
+				left: 0;
+				bottom: 0;
+				width: 100%;
+				height: 4px;
+				background: rgba(245, 244, 237, 0.14);
+				z-index: 21;
+			}
+
+			.progress span {
+				display: block;
+				width: 0;
+				height: 100%;
+				background: var(--terracotta);
+				transition: width 240ms ease;
+			}
+
+			.paper-orbit {
+				position: absolute;
+				right: -210px;
+				bottom: -250px;
+				width: 620px;
+				height: 620px;
+				border-radius: 50%;
+				border: 1px solid var(--border-warm);
+				opacity: 0.55;
+			}
+
+			.paper-orbit::before {
+				content: "";
+				position: absolute;
+				inset: 92px;
+				border-radius: inherit;
+				border: 1px solid var(--border-cream);
+			}
+
+			@keyframes slideInForward {
+				from {
+					opacity: 0;
+					transform: translateX(36px) scale(0.992);
+				}
+				to {
+					opacity: 1;
+					transform: translateX(0) scale(1);
+				}
+			}
+
+			@keyframes slideInBackward {
+				from {
+					opacity: 0;
+					transform: translateX(-36px) scale(0.992);
+				}
+				to {
+					opacity: 1;
+					transform: translateX(0) scale(1);
+				}
+			}
+
+			@keyframes liftIn {
+				from {
+					opacity: 0;
+					transform: translateY(22px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				* {
+					scroll-behavior: auto !important;
+					transition-duration: 0.01ms !important;
+					animation-duration: 0.01ms !important;
+				}
+			}
+		</style>
 	</head>
 	<body>
-		<h1>Astro</h1>
+		<main class="deck-shell" aria-label="个人 AI 编程经验分享 PPT">
+			<div class="stage" id="stage">
+				<section class="slide active" data-screen-label="01 封面">
+					<div class="paper-orbit"></div>
+					<div class="slide-grid center">
+						<p class="kicker">Technical Sharing / AI Programming</p>
+						<h1>个人 AI 编程经验分享</h1>
+						<p class="body" style="max-width: 940px;">
+							工具选择、使用流程、踩坑总结，以及一个更重要的结论：AI 编程本质上是文档能力的放大器。
+						</p>
+					</div>
+					<div class="slide-no">01 / 20</div>
+				</section>
+
+				<section class="slide dark" data-screen-label="02 核心观点">
+					<div class="slide-grid center">
+						<p class="kicker">Core thesis</p>
+						<div class="quote-card" style="max-width: 1280px;">
+							<p>AI 编程的上限，取决于你写文档的能力。</p>
+							<small>需求、边界、规则和审查标准，决定 Agent 最终能抵达哪里。</small>
+						</div>
+					</div>
+					<div class="slide-no">02 / 20</div>
+				</section>
+
+				<section class="slide" data-screen-label="03 为什么需要 AI 编程">
+					<div class="chapter-mark">01</div>
+					<div class="slide-grid two-col">
+						<div class="stack">
+							<p class="kicker">Pain points</p>
+							<h2>传统开发里，时间常常不是花在创造上。</h2>
+							<p class="body">很多精力被消耗在重复搜索、样板代码和上下文切换中。</p>
+						</div>
+						<ul class="list">
+							<li><strong>查文档 / 搜索引擎：</strong>找 API 用法，排查报错，反复确认边界。</li>
+							<li><strong>写样板代码：</strong>CRUD、配置文件、测试用例，机械但不可省。</li>
+							<li><strong>上下文切换：</strong>从需求、设计、实现、验证之间频繁跳跃。</li>
+						</ul>
+					</div>
+					<div class="slide-no">03 / 20</div>
+				</section>
+
+				<section class="slide" data-screen-label="04 AI 的价值">
+					<div class="slide-grid center">
+						<p class="kicker">Value</p>
+						<h2 style="max-width: 1280px;">把“想清楚怎么做”和“真的动手写”之间的摩擦降下来。</h2>
+						<div class="mini-grid" style="width: 100%; margin-top: 36px;">
+							<div class="mini-card">
+								<strong>更快起步</strong>
+								<span>把语法细节、配置模板、低风险重复劳动交给 Agent。</span>
+							</div>
+							<div class="mini-card">
+								<strong>更专注判断</strong>
+								<span>人的注意力回到需求拆解、架构边界和代码审查。</span>
+							</div>
+							<div class="mini-card">
+								<strong>更稳定协作</strong>
+								<span>复杂任务里，AI 是不知疲倦但需要清晰约束的 pair programmer。</span>
+							</div>
+						</div>
+					</div>
+					<div class="slide-no">04 / 20</div>
+				</section>
+
+				<section class="slide dark" data-screen-label="05 两大平台对比">
+					<div class="slide-grid stack">
+						<div class="spread">
+							<div>
+								<p class="kicker">Landscape</p>
+								<h2>OpenAI 与 Anthropic 的角色感不同。</h2>
+							</div>
+							<p class="body" style="max-width: 520px;">一个更像基础设施生态，一个更像专家型工具箱。</p>
+						</div>
+						<div class="table">
+							<div class="row header">
+								<div class="cell">维度</div>
+								<div class="cell">OpenAI</div>
+								<div class="cell">Anthropic</div>
+							</div>
+							<div class="row">
+								<div class="cell">定位</div>
+								<div class="cell">AI 基础设施，产品入口多</div>
+								<div class="cell">专家型 AI 工具，长于规则和文档</div>
+							</div>
+							<div class="row">
+								<div class="cell">额度 / 访问</div>
+								<div class="cell">额度较高，国内访问限制相对少</div>
+								<div class="cell">免费额度有限，访问限制更多</div>
+							</div>
+							<div class="row">
+								<div class="cell">主要产品</div>
+								<div class="cell">ChatGPT、Codex、GPT Image Gen、Sora</div>
+								<div class="cell">Claude、Claude Code、Claude Design</div>
+							</div>
+						</div>
+					</div>
+					<div class="slide-no">05 / 20</div>
+				</section>
+
+				<section class="slide" data-screen-label="06 我的选择">
+					<div class="slide-grid two-col">
+						<div class="stack">
+							<p class="kicker">My stack</p>
+							<h2>主力用 OpenAI 生态，Claude 作为补充。</h2>
+							<p class="body">Cursor 也在用，但额度不够时会自动降级到 Codex。核心不是站队，而是把工具放在合适的位置。</p>
+						</div>
+						<div class="mini-grid two">
+							<div class="mini-card">
+								<strong>OpenAI</strong>
+								<span>日常问答、Codex 执行、图片生成、快速探索。</span>
+							</div>
+							<div class="mini-card">
+								<strong>Claude</strong>
+								<span>规则文件、Skill 文档、架构讨论、二次 review。</span>
+							</div>
+						</div>
+					</div>
+					<div class="slide-no">06 / 20</div>
+				</section>
+
+				<section class="slide dark" data-screen-label="07 Head / Hands">
+					<div class="slide-grid equal-col">
+						<div class="compare-card dark-card">
+							<span class="tag">Head</span>
+							<h2>Claude Code</h2>
+							<p class="body">更像决策者：适合制定计划、设计架构、编写规则文件、代码审查。</p>
+						</div>
+						<div class="compare-card">
+							<span class="tag">Hands</span>
+							<h2>Codex</h2>
+							<p class="body">更像执行者：适合边界清晰、颗粒度较小、能快速验证的编码任务。</p>
+						</div>
+					</div>
+					<div class="slide-no">07 / 20</div>
+				</section>
+
+				<section class="slide" data-screen-label="08 Claude Code">
+					<div class="slide-grid two-col">
+						<div class="stack">
+							<p class="kicker">Claude Code</p>
+							<h2>需求不清晰时，它更愿意先问清楚。</h2>
+							<p class="body">适合新项目启动、规则文档、整体 review 这类需要判断力和收敛性的工作。</p>
+							<a class="source-link" href="/img/claude-windows.png" target="_blank">查看 Claude 截图</a>
+						</div>
+						<a class="image-frame contain" href="/img/claude-windows.png" target="_blank" style="height: 710px;">
+							<img src="/img/claude-windows.png" alt="Claude Windows 客户端截图" />
+							<span class="image-caption">Claude Windows</span>
+						</a>
+					</div>
+					<div class="slide-no">08 / 20</div>
+				</section>
+
+				<section class="slide" data-screen-label="09 Codex">
+					<div class="slide-grid two-col">
+						<div class="stack">
+							<p class="kicker">Codex</p>
+							<h2>任务越小、边界越清晰，Codex 越像一双快手。</h2>
+							<p class="body">它的优势是推进速度；风险是需求还没完全说清楚时可能直接开跑。</p>
+							<div class="source-row">
+								<a class="source-link" href="/img/codex-windows.png" target="_blank">Windows 客户端</a>
+								<a class="source-link" href="/img/codex-cli.png" target="_blank">CLI 截图</a>
+							</div>
+						</div>
+						<div class="stack">
+							<a class="image-frame contain" href="/img/codex-windows.png" target="_blank" style="height: 450px;">
+								<img src="/img/codex-windows.png" alt="Codex Windows 客户端截图" />
+								<span class="image-caption">Codex Windows</span>
+							</a>
+							<a class="image-frame contain" href="/img/codex-cli.png" target="_blank" style="height: 230px;">
+								<img src="/img/codex-cli.png" alt="Codex CLI 截图" />
+								<span class="image-caption">Codex CLI</span>
+							</a>
+						</div>
+					</div>
+					<div class="slide-no">09 / 20</div>
+				</section>
+
+				<section class="slide dark" data-screen-label="10 防止 Agent 乱跑">
+					<div class="slide-grid two-col">
+						<div class="stack">
+							<p class="kicker">Guardrails</p>
+							<h2>把“先确认边界”写进项目规则。</h2>
+							<p class="body">Agent 的行为要靠文档塑形：先理解需求、列出假设、确认边界，再实现。</p>
+							<a class="source-link" href="/doc/AGENTS/" target="_blank">查看 AGENTS.md</a>
+						</div>
+						<pre class="code-sample"># AGENT 行为规范
+
+1. 先理解需求，不要立即动手
+2. 列出理解和假设，向用户确认
+3. 明确边界条件
+4. 确认后再开始实现</pre>
+					</div>
+					<div class="slide-no">10 / 20</div>
+				</section>
+
+				<section class="slide" data-screen-label="11 Codex 使用流程">
+					<div class="slide-grid two-col">
+						<div class="stack">
+							<p class="kicker">Workflow</p>
+							<h2>复杂任务不要一次性全扔给 Agent。</h2>
+							<p class="body">先手动拆成小任务，再用 plan、审查、redo 的循环推进。</p>
+							<a class="source-link" href="/img/todo-snap.png" target="_blank">查看 TODO 截图</a>
+						</div>
+						<div class="stack">
+							<div class="flow vertical" style="grid-template-columns: 1fr; gap: 16px;">
+								<div class="flow-step"><b>0. 清理现场</b><span>确认 git 工作区干净，方便 redo。</span></div>
+								<div class="flow-step"><b>1. /plan</b><span>先讨论需求，产出计划。</span></div>
+								<div class="flow-step"><b>2. 审查计划</b><span>修改方向，确认后再执行。</span></div>
+								<div class="flow-step"><b>3. 审查代码</b><span>小问题继续修，偏差过大直接 redo。</span></div>
+							</div>
+							<a class="image-frame contain" href="/img/todo-snap.png" target="_blank" style="height: 230px;">
+								<img src="/img/todo-snap.png" alt="TODO.md 截图" />
+								<span class="image-caption">TODO.md</span>
+							</a>
+						</div>
+					</div>
+					<div class="slide-no">11 / 20</div>
+				</section>
+
+				<section class="slide" data-screen-label="12 订阅与客户端">
+					<div class="slide-grid stack">
+						<div class="slide-top-stack">
+							<div>
+								<p class="kicker">Daily setup</p>
+								<h2>订阅、客户端和入口选择，都影响日常摩擦。</h2>
+							</div>
+							<p class="body" style="max-width: 1120px;">国内用户可通过 PayPal 绑定信用卡完成订阅；日常主力是 Windows 客户端。</p>
+						</div>
+						<div class="mini-grid">
+							<a class="image-frame contain" href="/img/chatgpt-paypal-snap.png" target="_blank" style="height: 500px;">
+								<img src="/img/chatgpt-paypal-snap.png" alt="ChatGPT PayPal 订阅截图" />
+								<span class="image-caption">PayPal 订阅</span>
+							</a>
+							<a class="image-frame contain" href="/img/codex-windows.png" target="_blank" style="height: 500px;">
+								<img src="/img/codex-windows.png" alt="Codex Windows 截图" />
+								<span class="image-caption">Windows 客户端</span>
+							</a>
+							<a class="image-frame contain" href="/img/codex-cli.png" target="_blank" style="height: 500px;">
+								<img src="/img/codex-cli.png" alt="Codex CLI 截图" />
+								<span class="image-caption">CLI</span>
+							</a>
+						</div>
+					</div>
+					<div class="slide-no">12 / 20</div>
+				</section>
+
+				<section class="slide dark" data-screen-label="13 Codex Cloud">
+					<div class="slide-grid two-col">
+						<div class="stack">
+							<p class="kicker">Cloud agent</p>
+							<h2>把 Agent 放到云端，适合自动化和异步执行。</h2>
+							<p class="body">Codex Cloud 可以承接总结、写入、提交 PR 等链路型任务。</p>
+							<div class="source-row">
+								<a class="source-link" href="/img/codex-cloud-snap.png" target="_blank">Cloud 页面</a>
+								<a class="source-link" href="/img/codex-cloud-running.png" target="_blank">运行截图</a>
+							</div>
+						</div>
+						<div class="stack">
+							<a class="image-frame contain" href="/img/codex-cloud-snap.png" target="_blank" style="height: 330px;">
+								<img src="/img/codex-cloud-snap.png" alt="Codex Cloud 页面截图" />
+								<span class="image-caption">Codex Cloud</span>
+							</a>
+							<a class="image-frame contain" href="/img/codex-cloud-running.png" target="_blank" style="height: 330px;">
+								<img src="/img/codex-cloud-running.png" alt="Codex Cloud 运行截图" />
+								<span class="image-caption">Running task</span>
+							</a>
+						</div>
+					</div>
+					<div class="slide-no">13 / 20</div>
+				</section>
+
+				<section class="slide" data-screen-label="14 OpenAI 生态">
+					<div class="slide-grid center">
+						<p class="kicker">OpenAI ecosystem</p>
+						<h2 style="max-width: 1180px;">ChatGPT 是入口，Codex 是执行端，GPT Image Gen 扩展视觉表达。</h2>
+						<div class="mini-grid" style="width: 100%; margin-top: 36px;">
+							<div class="mini-card">
+								<strong>ChatGPT</strong>
+								<span>陌生技术、报错解释、代码理解和头脑风暴。</span>
+							</div>
+							<div class="mini-card">
+								<strong>Codex</strong>
+								<span>把清晰的小任务快速推进到可运行状态。</span>
+							</div>
+							<div class="mini-card">
+								<strong>GPT Image Gen</strong>
+								<span>生成高质量图片，为演示、原型和案例补足视觉材料。</span>
+							</div>
+						</div>
+						<a class="source-link" href="/doc/ai编程经验分享/" target="_blank">查看原始章节</a>
+					</div>
+					<div class="slide-no">14 / 20</div>
+				</section>
+
+				<section class="slide" data-screen-label="15 GPT Image Gen">
+					<div class="slide-grid stack">
+						<div class="slide-top-stack">
+							<div>
+								<p class="kicker">Gpt-Image-2 generation cases</p>
+								<h2>有图有真相的时代已经终结！</h2>
+							</div>
+							<p class="body" style="max-width: 1180px;">图片生成正在改变“证据”的视觉直觉。越逼真，越需要说明来源、提示词和上下文。</p>
+						</div>
+						<div class="equal-col" style="display: grid; gap: 34px;">
+							<a class="image-frame tall" href="/img/gpt-image-2-case1.png" target="_blank" style="height: 640px;">
+								<img src="/img/gpt-image-2-case1.png" alt="GPT Image Gen case1 示例图" />
+								<span class="image-caption prompt-caption">case1 提示词：生成一张千禧年中国普通家庭的照片。</span>
+							</a>
+							<a class="image-frame" href="/img/gpt-image-2-case2.png" target="_blank" style="height: 640px;">
+								<img src="/img/gpt-image-2-case2.png" alt="GPT Image Gen case2 千禧年中国普通家庭照片" />
+								<span class="image-caption prompt-caption">case2 提示词：生成千禧年祖国人和中国普通家庭一起吃饭的照片。</span>
+							</a>
+						</div>
+					</div>
+					<div class="slide-no">15 / 20</div>
+				</section>
+
+				<section class="slide dark" data-screen-label="16 Anthropic 生态">
+					<div class="slide-grid two-col">
+						<div class="stack">
+							<p class="kicker">Anthropic ecosystem</p>
+							<h2>Claude 的价值在于规则、文档和审查。</h2>
+							<p class="body">免费额度有限，但很适合写 Agent Skill、起草规则文档，以及对 Codex 生成代码做二次 review。</p>
+						</div>
+						<a class="image-frame contain" href="/img/claude-windows.png" target="_blank" style="height: 700px;">
+							<img src="/img/claude-windows.png" alt="Claude Windows 截图" />
+							<span class="image-caption">Claude</span>
+						</a>
+					</div>
+					<div class="slide-no">16 / 20</div>
+				</section>
+
+				<section class="slide" data-screen-label="17 Codex Plugin / Skill">
+					<div class="slide-grid two-col">
+						<div class="stack">
+							<p class="kicker">Codex Plugin / Skill</p>
+							<h2>把常用能力做成插件，让 Agent 调用同一套规则。</h2>
+							<p class="body">`codex-plugin.png` 展示的是 Codex 插件与 Skill 的组织方式：把设计规范、工作流和工具说明沉淀成可复用能力。</p>
+							<div class="source-row">
+								<a class="source-link" href="/doc/web-design-engineer/SKILL/" target="_blank">查看 Skill</a>
+								<a class="source-link" href="/doc/DESIGN/" target="_blank">查看 DESIGN.md</a>
+								<a class="source-link" href="/img/codex-plugin.png" target="_blank">查看插件截图</a>
+							</div>
+						</div>
+						<a class="image-frame contain" href="/img/codex-plugin.png" target="_blank" style="height: 610px;">
+							<img src="/img/codex-plugin.png" alt="Codex 插件截图" />
+							<span class="image-caption">Skill / Plugin</span>
+						</a>
+					</div>
+					<div class="slide-no">17 / 20</div>
+				</section>
+
+				<section class="slide" data-screen-label="18 个人知识库案例">
+					<div class="slide-grid center">
+						<p class="kicker">Case study</p>
+						<h2 style="max-width: 1260px;">用 Codex Cloud + GitHub Actions + Obsidian 搭建自动化知识沉淀流程。</h2>
+						<div class="mini-grid" style="width: 100%; margin-top: 36px;">
+							<div class="mini-card">
+								<strong>文章总结</strong>
+								<span>看到好文章，不再只靠临时收藏和模糊记忆。</span>
+							</div>
+							<div class="mini-card">
+								<strong>教程沉淀</strong>
+								<span>软件安装、环境配置，不必下次重新搜索。</span>
+							</div>
+							<div class="mini-card">
+								<strong>对话保存</strong>
+								<span>把 ChatGPT 中有价值的内容长期放进知识库。</span>
+							</div>
+						</div>
+					</div>
+					<div class="slide-no">18 / 20</div>
+				</section>
+
+				<section class="slide dark" data-screen-label="19 自动化流程">
+					<div class="slide-grid stack">
+						<div class="spread">
+							<div>
+								<p class="kicker">Automation pipeline</p>
+								<h2>从 URL 到 Obsidian，是一条可自动执行的链路。</h2>
+							</div>
+							<a class="source-link" href="/doc/article_ingest/" target="_blank">查看 article_ingest.md</a>
+						</div>
+						<div class="flow">
+							<div class="flow-step"><b>输入 URL</b><span>用户发出总结文章任务。</span></div>
+							<div class="flow-step"><b>Agent 总结</b><span>Codex Cloud 抓取并整理内容。</span></div>
+							<div class="flow-step"><b>写入 MD</b><span>生成结构化 Markdown 文件。</span></div>
+							<div class="flow-step"><b>自动合并</b><span>GitHub Actions 处理 PR。</span></div>
+							<div class="flow-step"><b>同步浏览</b><span>Obsidian 本地搜索和阅读。</span></div>
+						</div>
+						<div class="screenshot-grid three">
+							<a class="image-frame contain" href="/img/codex-cloud-snap.png" target="_blank" style="height: 330px;">
+								<img src="/img/codex-cloud-snap.png" alt="Codex Cloud 页面截图" />
+								<span class="image-caption">Codex Cloud</span>
+							</a>
+							<a class="image-frame contain" href="/img/github-actions-workflows.png" target="_blank" style="height: 330px;">
+								<img src="/img/github-actions-workflows.png" alt="GitHub Actions workflows 截图" />
+								<span class="image-caption">GitHub Actions</span>
+							</a>
+							<a class="image-frame contain" href="/img/obsidian-map-snap.png" target="_blank" style="height: 330px;">
+								<img src="/img/obsidian-map-snap.png" alt="Obsidian 知识图谱截图" />
+								<span class="image-caption">Obsidian</span>
+							</a>
+						</div>
+					</div>
+					<div class="slide-no">19 / 20</div>
+				</section>
+
+				<section class="slide" data-screen-label="20 总结">
+					<div class="paper-orbit"></div>
+					<div class="slide-grid two-col">
+						<div class="stack">
+							<p class="kicker">Takeaways</p>
+							<h2>真正需要训练的，不是“让 AI 写代码”，而是“让 AI 明白边界”。</h2>
+							<p class="body">规则、技能、任务说明，都是 AI 编程里的生产资料。</p>
+						</div>
+						<div class="stack">
+							<div class="quote-card">
+								<p style="font-size: 58px;">写 `AGENT.md`、写 Skill、写 `TODO.md`。</p>
+								<small>不擅长写文档没关系：让 AI 帮你写，然后你来审查和修改。</small>
+							</div>
+							<div class="source-row">
+								<a class="source-link" href="/doc/AGENTS/" target="_blank">AGENTS.md</a>
+								<a class="source-link" href="/doc/web-design-engineer/SKILL/" target="_blank">Skill</a>
+								<a class="source-link" href="/doc/ai编程经验分享/" target="_blank">分享稿</a>
+							</div>
+						</div>
+					</div>
+					<div class="slide-no">20 / 20</div>
+				</section>
+			</div>
+		</main>
+
+		<nav class="deck-controls" aria-label="Slide controls">
+			<button id="prevSlide" type="button" aria-label="上一页">‹</button>
+			<div class="counter" id="slideCounter">01 / 20</div>
+			<button id="nextSlide" type="button" aria-label="下一页">›</button>
+		</nav>
+		<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+		<script>
+			const slideLabels = [
+				"封面",
+				"核心观点",
+				"为什么需要 AI 编程",
+				"AI 的价值",
+				"两大平台对比",
+				"我的选择",
+				"Head / Hands",
+				"Claude Code",
+				"Codex",
+				"防止 Agent 乱跑",
+				"Codex 使用流程",
+				"订阅与客户端",
+				"Codex Cloud",
+				"OpenAI 生态",
+				"GPT Image Gen",
+				"Anthropic 生态",
+				"Codex Plugin / Skill",
+				"个人知识库案例",
+				"自动化流程",
+				"总结",
+			];
+			const stage = document.querySelector("#stage");
+			const slideNodes = Array.from(document.querySelectorAll(".slide"));
+			const prevButton = document.querySelector("#prevSlide");
+			const nextButton = document.querySelector("#nextSlide");
+			const counter = document.querySelector("#slideCounter");
+			const progressBar = document.querySelector("#progressBar");
+			const storageKey = "ai-programming-share-slide-index";
+
+			let currentIndex = Number.parseInt(localStorage.getItem(storageKey) || "0", 10);
+			if (!Number.isFinite(currentIndex)) currentIndex = 0;
+
+			function scaleStage() {
+				const viewportWidth = window.innerWidth;
+				const viewportHeight = window.innerHeight;
+				const edgePadding = 28;
+				const controlsSafeArea = 108;
+				const availableWidth = Math.max(320, viewportWidth - edgePadding * 2);
+				const availableHeight = Math.max(260, viewportHeight - edgePadding - controlsSafeArea);
+				const scaleX = availableWidth / 1920;
+				const scaleY = availableHeight / 1080;
+				const scale = Math.min(scaleX, scaleY);
+				const centerX = viewportWidth / 2;
+				const centerY = edgePadding + availableHeight / 2;
+
+				stage.style.left = `${centerX}px`;
+				stage.style.top = `${centerY}px`;
+				stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+			}
+
+			function showSlide(nextIndex) {
+				const previousIndex = currentIndex;
+				currentIndex = Math.max(0, Math.min(nextIndex, slideNodes.length - 1));
+				stage.classList.toggle("transition-backward", currentIndex < previousIndex);
+				stage.classList.toggle("transition-forward", currentIndex >= previousIndex);
+				slideNodes.forEach((slide, index) => {
+					slide.classList.toggle("active", index === currentIndex);
+				});
+
+				const displayIndex = String(currentIndex + 1).padStart(2, "0");
+				const total = String(slideNodes.length).padStart(2, "0");
+				counter.textContent = `${displayIndex} / ${total}`;
+				document.title = `${displayIndex} ${slideLabels[currentIndex]} - 个人 AI 编程经验分享`;
+				prevButton.disabled = currentIndex === 0;
+				nextButton.disabled = currentIndex === slideNodes.length - 1;
+				progressBar.style.width = `${((currentIndex + 1) / slideNodes.length) * 100}%`;
+				localStorage.setItem(storageKey, String(currentIndex));
+			}
+
+			prevButton.addEventListener("click", () => showSlide(currentIndex - 1));
+			nextButton.addEventListener("click", () => showSlide(currentIndex + 1));
+
+			document.addEventListener("keydown", (event) => {
+				const target = event.target;
+				const isEditable =
+					target instanceof HTMLElement &&
+					(target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
+
+				if (isEditable) return;
+				if (event.key === "ArrowRight" || event.key === " ") {
+					event.preventDefault();
+					showSlide(currentIndex + 1);
+				}
+				if (event.key === "ArrowLeft") {
+					event.preventDefault();
+					showSlide(currentIndex - 1);
+				}
+			});
+
+			window.addEventListener("resize", scaleStage);
+			scaleStage();
+			showSlide(currentIndex);
+		</script>
 	</body>
 </html>
